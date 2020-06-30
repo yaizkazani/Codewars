@@ -1,0 +1,39 @@
+def mix(s1, s2):
+    letters1 = [i for i in s1 if i.islower() and i.isalpha()]  # we extract lower letters from sentences
+    letters2 = [i for i in s2 if i.islower() and i.isalpha()]
+    if sorted(letters1) == sorted(letters2):
+        return ""
+    count = dict()
+    ans = dict()
+    ret = ""
+    for l in letters1:  # we count letters using dictionary in sentence1
+        count[l] = count.get(l, {})
+        count[l][1] = count[l].get(1, 0) + 1
+    for l in letters2:  # we count letters using same dictionary in sentence2
+        count[l] = count.get(l, {})
+        count[l][2] = count[l].get(2, 0) + 1
+    for key in count.keys():  # now we process our count dictionary to get data properly analyzed
+        count[key][1] = count[key].get(1, 0)  # since some letters could be in sentence1, but not in sentence2 and vice-versa we need to add zeroes to not to get into key error
+        count[key][2] = count[key].get(2, 0)  # example: 'u': {1: 1} transformed into 'u': {1: 1, 2: 0},
+        if count[key][1] == count[key][2] and count[key][1] > 1:  # if we have same number of letter in both sentences and this number > 1
+            ans[key] = "=: " + str(count[key][1])
+        elif count[key][1] > 1 or count[key][2] > 1:  # if number > 1 but differs for sentences
+            ans[key] = "1: " + str(count[key][1]) if count[key][1] > count[key][2] else "2: " + str(count[key][2])  # we took higher value and put sentence number before it
+    tmp = [i for i in ans.items()]
+    sub_ret = [[] for i in range(int(max(i[1].split(" ")[1] for i in tmp)) - 1)]
+    for i in sorted(set(i[1].split(" ")[1] for i in tmp), reverse=True):  # we make list to get 2nd element from former dict values -to understand which letter sequences length we have
+        for x in tmp: # we go through elements of ans.items() subarray
+            if x[1][3] == i:  # filtering - we take only those items to our list which value(number of letters in text) is equal this subarray value, i.e. subarray for 5x letters, for 4x letters etc etc
+                sub_ret[int(max(i[1].split(" ")[1] for i in tmp)) - int(i)].append(x[1][0] + ":" + x[0] * int(i))
+    for i in range(len(sub_ret)):  # just sorting
+        sub_ret[i] = sort(sub_ret[i])
+    for item in sub_ret:  # weird formatting
+        if item:
+            ret += "/".join(item) + "/" if len(item) > 1 else "".join(item) + "/"
+    return ret[:-1]
+
+
+def sort(list):
+    return sorted(list, key=lambda x: (x.split(":")[0], x.split(":")[1]))
+
+print(mix("codewars", "codewars"))
