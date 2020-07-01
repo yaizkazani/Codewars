@@ -1,0 +1,61 @@
+# Description:
+# 
+# For a given chemical formula represented by a string, count the number of atoms of each element contained in the molecule and return an object (associative array in PHP, Dictionary<string, int> in C#, Map<String,Integer> in Java).
+# 
+# For example:
+# 
+# water = 'H2O'
+# parse_molecule(water)                 # return {H: 2, O: 1}
+# 
+# magnesium_hydroxide = 'Mg(OH)2'
+# parse_molecule(magnesium_hydroxide)   # return {Mg: 1, O: 2, H: 2}
+# 
+# var fremy_salt = 'K4[ON(SO3)2]2'
+# parse_molecule(fremySalt)             # return {K: 4, O: 14, N: 2, S: 4}
+# 
+# As you can see, some formulas have brackets in them. The index outside the brackets tells you that you have to multiply count of each atom inside the bracket on this index. For example, in Fe(NO3)2 you have one iron atom, two nitrogen atoms and six oxygen atoms.
+# 
+# Note that brackets may be round, square or curly and can also be nested. Index after the braces is optional.
+
+
+
+
+def parse_molecule(formula):
+    import re
+    count = dict()
+    formula = formula.replace("[", "(").replace("{", "(").replace("]", ")").replace("}", ")")
+    for _ in range(formula.count("(")):
+        left, right = nested_brackets(formula)
+        if formula[right + 1: right + 2].isdigit():
+            formula = formula[:left] + formula[left + 1:right] * int(formula[right + 1: right + 2]) + formula[right + 2:]
+        else:
+            formula = formula[:left] + formula[left + 1:right] + formula[right + 1:]
+    list = re.findall("[A-Z][a-z]?|\d", formula)
+    print(list)
+    for i in range(len(list) - 1):
+        if list[i + 1].isdigit():
+            if i < len(list) - 2 and list[i + 2].isdigit():
+                list[i] = str(list[i]) * int("".join([list[i + 1], list[i + 2]]))
+            else:
+                list[i] = str(list[i]) * int(list[i + 1])
+    formula = "".join([i for i in list if i.isalpha()])
+    list = re.findall("[A-z][a-z]?", formula)
+    for i in list:
+        count[i] = count.get(i, 0) + 1
+    return count
+
+
+def nested_brackets(formula):
+    left = formula.find("(")
+    right = formula.rfind(")")
+    while True:
+        if formula.find("(", left + 1, right) != -1:
+            left = formula.find("(", left + 1)
+        elif formula.rfind(")", left, right) != -1:
+            right = formula.rfind(")", left, right)
+        else:
+            return left, right
+
+
+print(parse_molecule("K4[ON(SO3)2]2"))
+
