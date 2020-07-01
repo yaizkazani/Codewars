@@ -1,0 +1,13 @@
+def valid_parentheses(string):
+    """ Check if parenthesis is valid for given string"""
+    brackets = [i for i in string if i == "(" or i == ")"]
+    print(brackets)
+    for now in brackets:
+        i = 0
+        while i < len(brackets) - 1:
+            if brackets[i] == "(" and brackets[i + 1] == ")":
+                brackets.pop(i + 1)
+                brackets.pop(i)
+                i = 0
+            i += 1
+    return len(brackets) == 0
