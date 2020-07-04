@@ -31,8 +31,8 @@ def get_pins(observed):
 		for _ in s:
 			myset.add(_)
 	result = []
-	for pin in list(map("".join, itertools.product(myset, repeat=len(observed)))):
-		if pin_sequence_checker(pin, f):
+	for pin in list(map("".join, itertools.product(myset, repeat=len(observed)))):  # generate tuples with ALL possible combination
+		if pin_sequence_checker(pin, f):  # filter them so like possibilities for 3rd key wont be allowed for 1st press key.
 			result.append(pin)
 	return result
 
@@ -46,25 +46,24 @@ def pin_sequence_checker(pin, f):
 
 
 def suggestion(number, numpad):
-	number = 11 if number == 0 else number
+	""" we get number + 2d numpad list and return all possible adjacent numpad keys"""
+	number = 11 if number == 0 else number  # 0 doesnt fit our logic so we have to replace it :)
 	ret = []
 	row = 0
-	for now in range(len(numpad)):
+	for now in range(len(numpad)):  # find row of current number
 		if number in numpad[now]:
 			row = now
 			break
-	if number + 1 in numpad[row]:
+	if number + 1 in numpad[row]:  # we check if adjacent in the same row exist (+1 , -1)
 		ret.append(number + 1)
 	if number - 1 in numpad[row]:
 		ret.append(number - 1)
-	if row + 1 < len(numpad) and number + 3 in numpad[row + 1]:
+	if row + 1 < len(numpad) and number + 3 in numpad[row + 1]: # we check if adjacent in top/bottom row exist (+3, -3)
 		ret.append(number + 3)
 	if row - 1 >= 0 and number - 3 in numpad[row - 1]:
 		ret.append(number - 3)
 	ret.append(number)
-	return "".join(map(str, ret)).replace("11", "0")
+	return "".join(map(str, ret)).replace("11", "0")  # need to change 11 and 0 again :)
 
 
 print(get_pins("0"))
-
-# нужно запоминать последовательность нажатий, то есть 1 пин, потом 2 и 3й - не просто тупо перебором
