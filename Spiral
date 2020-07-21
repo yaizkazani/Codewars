@@ -1,0 +1,96 @@
+# 0000000000
+# .........0
+# 00000000.0
+# 0......0.0
+# 0.0000.0.0
+# 0.0..0.0.0
+# 0.0....0.0
+# 0.000000.0
+# 0........0
+# 0000000000
+#
+# Return value should contain array of arrays, of 0 and 1, for example for given size 5 result should be:
+#
+# [[1,1,1,1,1],[0,0,0,0,1],[1,1,1,0,1],[1,0,0,0,1],[1,1,1,1,1]]
+#
+# Because of the edge-cases for tiny spirals, the size will be at least 5.
+#
+# General rule-of-a-thumb is, that the snake made with '1' cannot touch to itself.
+
+
+
+directions = {"right": [0, 1],  # right
+              "down": [1, 0],  # down
+              "left": [0, -1],  # left
+              "up": [-1, 0]}  # up
+
+
+def create_matrix(size):
+	matrix = [[0 for i in range(size)] for _ in range(size)]  # create matrix
+	return matrix
+
+
+def check_next_step(matrix, dir, next, size, inside):
+	"""
+	:param matrix: - matrix we work with
+	:param dir:  - direction of movement
+	:param next:  - coordinates of cell we are going to check
+	:param size: - matrix size
+	:param inside: - if we are in the inner circles or not
+	:return: - returns "Turn" if we need to change direction after next cell. Conditions are - if next cell in this direction (means current cell + 2) is adjacent to "busy" cell
+			 - returns "Exit" if we have nowhere to move. Conditions are - adjacent cells(left * right for up/down movement and vice - versa).
+			 - if not this ↑ it checks if we gonna bump into busy cell if we continue movement.
+	"""
+	i = next[0]
+	j = next[1]
+	if not inside:
+		if (dir == "right" and j == size - 1) or (dir == "down" and i == size - 1) or (dir == "left" and j == 0) or (dir == "up" and i == 0):
+			return "Turn"
+	if (dir == "up" and matrix[i - 1][j] == 1) or (dir == "right" and j + 1 < size and matrix[i][j + 1] == 1) or (dir == "down" and i + 1 < size and matrix[i + 1][j] == 1) or (dir == "left" and j - 1 >= 0 and matrix[i][j - 1] == 1):
+		return "Exit"
+	if (i + 1 < size and i - 1 > 0) and (dir == "left" or dir == "right") and (matrix[i + 1][j] == 1 or matrix[i - 1][j] == 1) or (j + 1 < size and j - 1 > 0) and (dir == "up" or dir == "down") and (matrix[i][j - 1] == 1 or matrix[i][j + 1] == 1):
+		return "Exit"
+	elif (dir == "up" and matrix[i - 2][j] == 1) or (dir == "right" and j + 2 < size and matrix[i][j + 2] == 1) or (dir == "down" and i + 2 < size and matrix[i + 2][j] == 1) or (dir == "left" and j - 2 >= 0 and matrix[i][j - 2] == 1):
+		return "Turn"
+
+
+
+
+
+
+def spiralize(size):
+	"""
+	:param size:  - Matrix size
+	:return: - returns modified matrix
+	"""
+	matrix = create_matrix(size)
+	i = 0
+	j = 0
+	matrix[i][j] = 1
+	dir = "right"
+	inside = False
+	while True:
+		if check_next_step(matrix, dir, (i + directions[dir][0], j + directions[dir][1]), size, inside) == "Turn":  # we we're going to turn we step into and change direction
+			i += directions[dir][0]
+			j += directions[dir][1]
+			matrix[i][j] = 1
+
+			if dir == "right":
+				dir = "down"
+			elif dir == "down":
+				dir = "left"
+			elif dir == "left":
+				dir = "up"
+			elif dir == "up":
+				dir = "right"
+				inside = True  # to determine that we turned right 2nd time meaning we're in inner cells
+			continue
+		elif check_next_step(matrix, dir, (i + directions[dir][0], j + directions[dir][1]), size, inside) == "Exit": # if next cell is final
+			return matrix
+		i += directions[dir][0]
+		j += directions[dir][1]
+		matrix[i][j] = 1
+
+
+for row in spiralize(8):
+	print(row)
