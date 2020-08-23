@@ -1,0 +1,40 @@
+# For the purpose of this Kata, a year is 365 days and a day is 24 hours.
+# The resulting expression is made of components like 4 seconds, 1 year, etc. In general, a positive integer and one of the valid units of time, separated by a space.
+# The unit of time is used in plural if the integer is greater than 1.
+# The components are separated by a comma and a space (", "). Except the last component, which is separated by " and ", just like it would be written in English.
+# A more significant units of time will occur before than a least significant one. Therefore, 1 second and 1 year is not correct, but 1 year and 1 second is.
+
+# The function must accept a non-negative integer. If it is zero, it just returns "now".
+# Otherwise, the duration is expressed as a combination of years, days, hours, minutes and seconds.
+
+# test.assert_equals(format_duration(3662), "1 hour, 1 minute and 2 seconds")
+
+
+def format_duration(seconds):
+	import logging
+	logging.basicConfig(level=logging.DEBUG, format='%(levelname)s %(message)s')
+	logging.disable(logging.CRITICAL)
+	timeframes = [(31536000, "year"), (86400, "day"), (3600, "hour"), (60, "minute"), (1, "second")]
+	ans = []
+	ret = ""
+	if seconds == 0:
+		return "now"
+	else:
+		for tf in timeframes:
+			seconds, val = splitter(seconds, tf[0])
+			ans.append(val)
+		logging.debug(f"ans = {ans}")
+		for item in list(zip(ans, timeframes)):
+			s = "s" if item[0] > 1 else ""
+			ret += f"{item[0]} {item[1][1]}{s}, " if item[0] > 0 else ""
+		logging.info(f"ret = {ret}")
+		head, sep, tail = ret.rstrip(" "",").rpartition(",")
+		return f"{head} and{tail}" if sum(1 for i in ans if i > 0) > 1 else ret.rstrip(" "",")
+
+def splitter(seconds, tf):
+	if seconds == seconds % tf:
+		return seconds, 0
+	else:
+		return seconds % tf, seconds // tf
+
+print(format_duration(62))
