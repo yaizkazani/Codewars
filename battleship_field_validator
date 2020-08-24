@@ -4,23 +4,19 @@
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s %(message)s')
 
-battleField = [[0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
-[0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-[0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
-[0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-[1, 0, 1, 1, 1, 1, 0, 1, 0, 0],
-[1, 0, 0, 0, 0, 0, 0, 1, 0, 0]]
+battleField =  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+				[0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+				[0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+				[0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 
-ships = {4: [1, 0, "battleship"],  # size of ship: [allowed, current, name]
-         3: [2, 0, "cruiser"],
-         2: [3, 0, "destroyer"],
-         1: [4, 0, "submarine"]
-         }
+
 
 
 def in_field(i, j):
@@ -47,6 +43,11 @@ def validate_battlefield(field):
 	# follow 1 to determine ship size, remember cells. Check if this ship allowed.
 	# replace ship cells and adjacent cells with 2. If 1 found in adj. cells - return False
 	# If no errors and we got to [9][9] - check for ship quantity. Return True or False
+	ships = {4: [1, 0, "battleship"],  # size of ship: [allowed, current, name]
+	         3: [2, 0, "cruiser"],
+	         2: [3, 0, "destroyer"],
+	         1: [4, 0, "submarine"]
+	         }
 	for i in range(10):
 		for j in range(10):
 			if field[i][j] == 1:  # ship found! Calling ship_analyzer for help!
@@ -61,10 +62,9 @@ def validate_battlefield(field):
 				else:
 					logging.error(f"ship_analyzer returned None for coordinates {i} and {j}")
 					return False
+	print(ships)
 	for key in ships:
-		if ships[key][0] == ships[key][1]:
-			return True
-		else:
+		if ships[key][0] != ships[key][1]:
 			logging.error(f"number of ships failure. Ship is {ships[key]}")
 			return False
 	return True
