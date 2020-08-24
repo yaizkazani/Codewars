@@ -16,9 +16,6 @@ battleField =  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 
-
-
-
 def in_field(i, j):
 	"""
 	:param i: number of row
@@ -29,6 +26,11 @@ def in_field(i, j):
 
 
 def check_adjacent_cells(adj_cells, field):
+	"""
+	:param adj_cells: list of tuples with coordinates of cells that a) in field b) adjacent to current detected ship
+	:param field: battlefield
+	:return: battlefield or None if a ship detected in adj. cells meaning condition broken
+	"""
 	for cell in adj_cells:
 		if field[cell[0]][cell[1]] == 1:
 			logging.error(f"Ship was found in adjacent cell, coords are {cell[0]} and {cell[1]}")
@@ -39,20 +41,20 @@ def check_adjacent_cells(adj_cells, field):
 
 
 def validate_battlefield(field):
-	# go through lists to find 1
-	# follow 1 to determine ship size, remember cells. Check if this ship allowed.
-	# replace ship cells and adjacent cells with 2. If 1 found in adj. cells - return False
-	# If no errors and we got to [9][9] - check for ship quantity. Return True or False
+	"""
+	:param field: battlefield - list of lists of 10 integer values, where 0 = empty cell, 1 = ship cell
+	:return: True or False depending on if battlefield meet game conditions
+	"""
 	ships = {4: [1, 0, "battleship"],  # size of ship: [allowed, current, name]
 	         3: [2, 0, "cruiser"],
 	         2: [3, 0, "destroyer"],
 	         1: [4, 0, "submarine"]
 	         }
-	for i in range(10):
+	for i in range(10):  # we go through battlefield
 		for j in range(10):
 			if field[i][j] == 1:  # ship found! Calling ship_analyzer for help!
 				ship = ship_analyzer(i, j, field)
-				if ship:
+				if ship:  # if our ship is valid
 					logging.info(f"Valid ship found, stats: {ship[0]}")
 					ships[ship[0]][1] += 1  # +1 to found ship count
 					field = ship[1]  # updating our field
@@ -63,7 +65,7 @@ def validate_battlefield(field):
 					logging.error(f"ship_analyzer returned None for coordinates {i} and {j}")
 					return False
 	print(ships)
-	for key in ships:
+	for key in ships:  # checking if battlefield has correct number of ships
 		if ships[key][0] != ships[key][1]:
 			logging.error(f"number of ships failure. Ship is {ships[key]}")
 			return False
@@ -81,32 +83,24 @@ def ship_analyzer(i, j, field):
 	ex. (4, field)
 	"""
 	adjacent_cells = []
-	#direction = "down" if in_field(i + 1, j) and field[i + 1][j] == 1 else direction = "right" if in_field(i, j + 1) and field[i][j + 1] == 1 else direction = ""
-	if in_field(i + 1, j) and field[i + 1][j] == 1:
-		direction = "down"
-	elif in_field(i, j + 1) and field[i][j + 1] == 1:
-		direction = "right"
-	else:
-		direction = ""
-
+	direction = "down" if in_field(i + 1, j) and field[i + 1][j] == 1 else "right" if in_field(i, j + 1) and field[i][j + 1] == 1 else ""  # detecting direction
 	if not direction:  # we assume that ship has no direction = this is a submarine
 		field[i][j] = 2
 		for di in [-1, 0, 1]:
 			for dj in [-1, 0, 1]:
 				if in_field(i + di, j + dj) and field[i + di][j + dj] != 2:
-					adjacent_cells.append((i + di, j + dj))
+					adjacent_cells.append((i + di, j + dj))  # we add adjacent cells to list except of ship cells
 		field = check_adjacent_cells(adjacent_cells, field)
 		if not field:
 			logging.error(f"submarine check_adjacent_cells check failed, coords: {i} and {j}")
 			return None
 		return 1, field  # ship is a valid submarine
-
-	ship_start_coords = (i, j)
-	field[i][j] = 2
+	ship_start_coords = (i, j)  # remember where we've found the ship
+	field[i][j] = 2  # replace first ship's cell with 2
 	ship_size = 1
 	dir = (1, 0) if direction == "down" else (0, 1)
 	while True:
-		if in_field(i + dir[0], j + dir[1]) and field[i + dir[0]][j + dir[1]] == 1:
+		if in_field(i + dir[0], j + dir[1]) and field[i + dir[0]][j + dir[1]] == 1:  # if next ship's cell in field
 			ship_size += 1
 			if ship_size > 4:  # ship is too big
 				logging.error(f"Ship is too big! Coordinates are {i} and {j}")
@@ -116,7 +110,7 @@ def ship_analyzer(i, j, field):
 			j += dir[1]
 		else:  # we reached end of the ship
 			i, j = ship_start_coords
-			if direction == "down":
+			if direction == "down":  # we go 2nd time through the ship to collect adjacent cells. This could be done in one pass, however more readable this way IMHO
 				for i in range(i, i + ship_size):
 					for di in [-1, 0, 1]:
 						for dj in [-1, 0, 1]:
